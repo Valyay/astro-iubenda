@@ -1,14 +1,79 @@
 {
   "name": "astro-iubenda",
+  "description": "Astro integration for Iubenda Privacy Policy and Terms & Conditions",
+  "repository": "https://github.com/Valyay/astro-iubenda",
+  "homepage": "https://github.com/Valyay/astro-iubenda#readme",
+  "bugs": {
+    "url": "https://github.com/Valyay/astro-iubenda/issues"
+  },
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "iubenda",
+    "privacy-policy",
+    "terms",
+    "conditions",
+    "cookie-policy"
+  ],
+  "author": "Evgeniy Valyaev <dev.valyay@gmail.com>",
+  "license": "MIT",
   "type": "module",
   "version": "0.0.1",
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "virtual.d.ts"
+  ],
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "clean": "rimraf dist pnpm-lock.yaml .pnpm-debug.log node_modules",
+    "typecheck": "tsc --noEmit --pretty",
+    "test:pub": "pnpm publish --dry-run --no-git-checks",
+    "preinstall": "npx only-allow pnpm",
+    "build": "tsup",
+    "lint": "eslint . --ext .ts,.js,.mjs,.cjs",
+    "lint:fix": "eslint . --fix --ext .ts,.js,.mjs,.cjs",
+    "format": "prettier -w  .",
+    "prettier:check": "prettier --check .",
+    "prepack": "pnpm run build && cp ./virtual.d.ts dist/virtual.d.ts",
+    "changeset": "changeset",
+    "version": "changeset version && pnpm install --no-frozen-lockfile",
+    "release": "pnpm run build && changeset publish"
   },
   "dependencies": {
     "astro": "^5.7.7"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.2",
+    "@types/node": "^22.15.3",
+    "@typescript-eslint/eslint-plugin": "^8.31.0",
+    "@typescript-eslint/parser": "^8.31.0",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "nano-staged": "^0.8.0",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "simple-git-hooks": "^2.13.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.1",
+    "vite": "^6.3.3",
+    "vitest": "^3.1.2"
+  },
+  "nano-staged": {
+    "*.{js,jsx,ts,tsx,astro}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
+  "simple-git-hooks": {
+    "pre-commit": "./node_modules/.bin/nano-staged",
+    "postinstall": "npx simple-git-hooks"
+  },
+  "engines": {
+    "pnpm": ">=9",
+    "node": ">=18"
   }
 }

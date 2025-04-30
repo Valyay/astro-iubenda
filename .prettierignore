@@ -1,0 +1,11 @@
+.astro
+.dist
+.cache
+package.json
+package-lock.json
+public
+.cache
+.changeset
+.vscode
+node_modules
+.git

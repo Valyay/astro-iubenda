@@ -1,47 +1,208 @@
-# Astro Starter Kit: Minimal
+# astro-iubenda
 
-```sh
-pnpm create astro@latest -- --template minimal
+This Astro integration fetches and provides Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions content for your Astro project.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+## Why astro-iubenda?
+
+[Iubenda](https://www.iubenda.com/) is a popular service that helps websites comply with legal requirements for privacy policies and terms of service. This integration simplifies the process of fetching and displaying Iubenda legal documents in your Astro project.
+
+Key benefits:
+
+- Automatically fetches your Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions
+- Provides content via a virtual module or writes to disk as JSON files
+- Can strip HTML markup for easier styling
+- Clean API to access documents in your components
+
+## Usage
+
+### Installation
+
+```bash
+# Using npm
+npm install astro-iubenda
+
+# Using yarn
+yarn add astro-iubenda
+
+# Using pnpm
+pnpm add astro-iubenda
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+### Finding Your Document IDs
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+To get your document IDs:
 
-## 🚀 Project Structure
+1. Log in to your [Iubenda dashboard](https://www.iubenda.com/en/dashboard)
+2. Select your project
+3. Find the document ID in the URL when viewing your policy:
+   ```
+   https://www.iubenda.com/privacy-policy/12345678
+   ```
+   Where `12345678` is your document ID
 
-Inside of your Astro project, you'll see the following folders and files:
+You can also find this ID in the embedded code section as described in the [Direct Text Embedding API documentation](https://www.iubenda.com/en/help/78-privacy-policy-direct-text-embedding-api).
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+If you have policies in multiple languages or for different purposes, you can use multiple document IDs in the configuration.
+
+### Adding the Integration
+
+Add the integration to your `astro.config.mjs` file:
+
+```js
+import { defineConfig } from "astro/config";
+import iubenda from "astro-iubenda";
+
+export default defineConfig({
+  // ...
+  integrations: [
+    iubenda({
+      documentIds: [<your-document-id>],
+    }),
+  ],
+});
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### Adding the Integration
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+Then import the documents in your Astro components:
 
-Any static assets, like images, can be placed in the `public/` directory.
+```astro
+---
+import { getDocument } from 'virtual:astro-iubenda';
 
-## 🧞 Commands
+const privacyPolicy = getDocument(<your-document-id>, 'privacyPolicy');
+const cookiePolicy = getDocument(<your-document-id>, 'cookiePolicy');
+const termsAndConditions = getDocument(<your-document-id>, 'termsAndConditions');
+---
 
-All commands are run from the root of the project, from a terminal:
+<div set:html={privacyPolicy}></div>
+```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## Configuration
 
-## 👀 Want to learn more?
+To configure this integration, pass an options object to the `iubenda()` function in your `astro.config.mjs` file.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+```js
+iubenda({
+  documentIds: [<your-document-id>],
+  writeToDisk: true,
+  outputDir: "src/content/iubenda",
+  stripMarkup: true,
+});
+```
+
+| Parameter     | Type                      | Required | Default                 | Description                                                                                      |
+| ------------- | ------------------------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `documentIds` | `Array<string \| number>` | Yes      | -                       | Array of Iubenda document IDs to fetch. You can find your document ID in your Iubenda dashboard. |
+| `writeToDisk` | `boolean`                 | No       | `false`                 | Whether to write the fetched documents to disk as JSON files.                                    |
+| `outputDir`   | `string`                  | No       | `'src/content/iubenda'` | Directory where JSON files will be written if `writeToDisk` is true.                             |
+| `stripMarkup` | `boolean`                 | No       | `true`                  | Whether to strip HTML markup from the fetched documents.                                         |
+
+## API
+
+The integration provides a virtual module that you can import in your components.
+
+### documents
+
+Full object with all fetched documents, keyed by document ID.
+
+```js
+import { documents } from "virtual:astro-iubenda";
+```
+
+### getDocument(id, type)
+
+**Parameters:**
+
+- `id` - Document ID to retrieve
+- `type` - Type of document ('privacyPolicy', 'cookiePolicy', or 'termsAndConditions')
+
+**Returns:** The document content as a string, or null if not found.
+
+```js
+import { getDocument } from "virtual:astro-iubenda";
+
+const privacyPolicy = getDocument("12345678", "privacyPolicy");
+```
+
+## Examples
+
+### Basic Usage
+
+```astro
+---
+import { getDocument } from 'virtual:astro-iubenda';
+---
+
+<html>
+  <head>
+    <title>Privacy Policy</title>
+  </head>
+  <body>
+    <h1>Our Privacy Policy</h1>
+    <div set:html={getDocument('12345678', 'privacyPolicy')}></div>
+  </body>
+</html>
+```
+
+### Multiple Documents
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+import iubenda from "astro-iubenda";
+
+export default defineConfig({
+	integrations: [
+		iubenda({
+			documentIds: ["12345678", "87654321"],
+			writeToDisk: true,
+		}),
+	],
+});
+```
+
+```astro
+---
+import { documents } from 'virtual:astro-iubenda';
+---
+
+<select id="policy-selector">
+  <option value="12345678">English</option>
+  <option value="87654321">Spanish</option>
+</select>
+
+<div id="policy-content"></div>
+
+<script>
+  const selector = document.getElementById('policy-selector');
+  const content = document.getElementById('policy-content');
+  const documents = {JSON.stringify(documents)};
+
+  selector.addEventListener('change', () => {
+    const id = selector.value;
+    content.innerHTML = documents[id].privacyPolicy;
+  });
+
+  // Set initial content
+  content.innerHTML = documents[selector.value].privacyPolicy;
+</script>
+```
+
+## Contributing
+
+You're welcome to submit an issue or PR!
+
+## Changelog
+
+See [GitHub releases](https://github.com/Valyay/astro-iubenda/releases) for a history of changes to this integration.
+
+## License
+
+MIT - see [LICENSE](LICENSE) for details.
+
+## Inspiration
+
+[gatsby-source-iubenda-documents](https://github.com/HeinrichTremblay/gatsby-source-iubenda-documents)

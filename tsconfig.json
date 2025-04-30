@@ -1,5 +1,27 @@
 {
-  "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"extends": "astro/tsconfigs/strict",
+	"include": [".astro/types.d.ts", "**/*"],
+	"exclude": ["dist"],
+	"compilerOptions": {
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+
+		"declaration": true,
+		"emitDeclarationOnly": false,
+		"outDir": "./dist",
+		"noEmit": false,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"preserveSymlinks": true,
+
+		"target": "ES2021",
+		"verbatimModuleSyntax": true,
+		"removeComments": true,
+		"skipLibCheck": true,
+		"allowImportingTsExtensions": false,
+		"stripInternal": true,
+
+		"types": ["node", "astro"]
+	}
 }
