@@ -3,6 +3,7 @@
 This Astro integration fetches and provides Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions content for your Astro project.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/Valyay/astro-iubenda/branch/main/graph/badge.svg)](https://codecov.io/gh/Valyay/astro-iubenda)
 
 ## Why astro-iubenda?
 

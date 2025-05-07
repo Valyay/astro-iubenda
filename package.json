@@ -39,7 +39,9 @@
     "prepack": "pnpm run build && cp ./virtual.d.ts dist/virtual.d.ts",
     "changeset": "changeset",
     "version": "changeset version && pnpm install --no-frozen-lockfile",
-    "release": "pnpm run build && changeset publish"
+    "release": "pnpm run build && changeset publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "astro": "^5.7.7"
