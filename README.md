@@ -88,7 +88,7 @@ To configure this integration, pass an options object to the `iubenda()` functio
 ```js
 iubenda({
   documentIds: [<your-document-id>],
-  writeToDisk: true,
+  saveInJson: true,
   outputDir: "src/content/iubenda",
   stripMarkup: true,
 });
@@ -97,8 +97,8 @@ iubenda({
 | Parameter     | Type                      | Required | Default                 | Description                                                                                      |
 | ------------- | ------------------------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
 | `documentIds` | `Array<string \| number>` | Yes      | -                       | Array of Iubenda document IDs to fetch. You can find your document ID in your Iubenda dashboard. |
-| `writeToDisk` | `boolean`                 | No       | `false`                 | Whether to write the fetched documents to disk as JSON files.                                    |
-| `outputDir`   | `string`                  | No       | `'src/content/iubenda'` | Directory where JSON files will be written if `writeToDisk` is true.                             |
+| `saveInJson`  | `boolean`                 | No       | `false`                 | Whether to write the fetched documents to disk as JSON files.                                    |
+| `outputDir`   | `string`                  | No       | `'src/content/iubenda'` | Directory where JSON files will be written if `saveInJson` is true.                              |
 | `stripMarkup` | `boolean`                 | No       | `true`                  | Whether to strip HTML markup from the fetched documents.                                         |
 
 ## API
@@ -159,7 +159,7 @@ export default defineConfig({
 	integrations: [
 		iubenda({
 			documentIds: ["12345678", "87654321"],
-			writeToDisk: true,
+			saveInJson: true,
 		}),
 	],
 });
