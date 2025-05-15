@@ -10,15 +10,42 @@ export const TERMS_URL = "https://www.iubenda.com/api/terms-and-conditions/";
 export const formatContent = (content: string, stripMarkup: boolean) =>
 	stripMarkup ? content.replace(/"|\\/g, "") : content;
 
+const PRO_MSG_RE = /convert it to/i;
+const HTML_TAG_RE = /<\/?(p|div|h\d|ul|ol|li|section|br)\b/i;
+
+const buildError = (msg: string, code: number) => {
+	const err = new Error(msg);
+	(err as unknown as { code: number }).code = code;
+	return err;
+};
+
 export const fetchDocument = async (url: string, stripMarkup: boolean) => {
 	const res = await fetch(`${url}/no-markup`);
+
 	if (!res.ok) {
-		const error = new Error(`HTTP ${res.status}`);
-		(error as unknown as { code: number }).code = res.status;
-		throw error;
+		throw buildError(`HTTP ${res.status}`, res.status);
 	}
-	const { content } = (await res.json()) as unknown as { content: string };
-	return formatContent(content, stripMarkup);
+
+	const raw = await res.text();
+
+	try {
+		const parsed = JSON.parse(raw) as { content?: string };
+		if (typeof parsed.content === "string" && parsed.content.trim()) {
+			return formatContent(parsed.content, stripMarkup);
+		}
+	} catch {
+		/* not JSON – fallthrough */
+	}
+
+	if (PRO_MSG_RE.test(raw)) {
+		throw buildError("Requires Pro plan", 403);
+	}
+
+	if (raw.length === 0 && !HTML_TAG_RE.test(raw)) {
+		throw buildError("Empty or invalid document", 404);
+	}
+
+	return formatContent(raw, stripMarkup);
 };
 
 export const handleApiError = (
@@ -117,12 +144,16 @@ export const writeDocumentsToJson = async (
 	logger.info(`💾 Iubenda JSON-files written to ${path.relative(fileURLToPath(projectRoot), dir)}`);
 };
 
-export const createVitePlugin = (virtualCode: string) => ({
-	name: "astro-iubenda",
-	resolveId(id: string) {
-		return id === "virtual:astro-iubenda" ? "\0virtual:astro-iubenda" : undefined;
-	},
-	load(id: string) {
-		return id === "\0virtual:astro-iubenda" ? virtualCode : undefined;
-	},
-});
+export const createVitePlugin = (codeOrGetter: string | (() => string)) => {
+	const getCode = typeof codeOrGetter === "function" ? codeOrGetter : () => codeOrGetter;
+
+	return {
+		name: "astro-iubenda",
+		resolveId(id: string) {
+			return id === "virtual:astro-iubenda" ? "\0virtual:astro-iubenda" : undefined;
+		},
+		load(id: string) {
+			return id === "\0virtual:astro-iubenda" ? getCode() : undefined;
+		},
+	};
+};

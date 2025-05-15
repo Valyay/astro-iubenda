@@ -36,7 +36,7 @@ export default function iubenda(opts: Options): AstroIntegration {
 			"astro:config:setup": ({ config, updateConfig, logger }) => {
 				projectRoot = (config as unknown as { root: URL }).root;
 
-				const vitePlugin = createVitePlugin(virtualCode);
+				const vitePlugin = createVitePlugin(() => virtualCode);
 
 				updateConfig({
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment

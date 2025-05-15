@@ -87,15 +87,15 @@ describe("astro-iubenda", () => {
 			mockFetch
 				.mockResolvedValueOnce({
 					ok: true,
-					json: () => Promise.resolve({ content: "Privacy Policy Content" }),
+					text: () => Promise.resolve(JSON.stringify({ content: "Privacy Policy Content" })),
 				})
 				.mockResolvedValueOnce({
 					ok: true,
-					json: () => Promise.resolve({ content: "Cookie Policy Content" }),
+					text: () => Promise.resolve(JSON.stringify({ content: "Cookie Policy Content" })),
 				})
 				.mockResolvedValueOnce({
 					ok: true,
-					json: () => Promise.resolve({ content: "Terms & Conditions Content" }),
+					text: () => Promise.resolve(JSON.stringify({ content: "Terms & Conditions Content" })),
 				});
 
 			await integration.hooks["astro:server:setup"]?.({

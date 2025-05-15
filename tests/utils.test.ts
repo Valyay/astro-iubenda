@@ -20,6 +20,18 @@ const createMockLogger = () => {
 	return logger as unknown as AstroIntegrationLogger;
 };
 
+// Helpers for building fake Fetch API Response objects
+const mockJsonResponse = (obj: unknown) => ({
+	ok: true,
+	status: 200,
+	text: () => Promise.resolve(JSON.stringify(obj)),
+});
+const mockTextResponse = (text: string, status = 200) => ({
+	ok: status >= 200 && status < 300,
+	status,
+	text: () => Promise.resolve(text),
+});
+
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
@@ -40,53 +52,61 @@ describe("utility functions", () => {
 	});
 
 	describe("fetchDocument", () => {
-		it("should fetch and format document successfully", async () => {
-			const mockResponse = { content: 'Test "content"' };
-			mockFetch.mockResolvedValueOnce({
-				ok: true,
-				json: () => Promise.resolve(mockResponse),
-			});
+		afterEach(() => {
+			mockFetch.mockReset();
+		});
 
-			const result = await fetchDocument("https://test.url", true);
-
-			expect(mockFetch).toHaveBeenCalledWith("https://test.url/no-markup");
+		it("parses JSON payload and formats", async () => {
+			mockFetch.mockResolvedValueOnce(mockJsonResponse({ content: 'Test "content"' }));
+			const result = await fetchDocument("https://api.example/doc", true);
+			expect(mockFetch).toHaveBeenCalledWith("https://api.example/doc/no-markup");
 			expect(result).toBe("Test content");
 		});
 
-		it("should throw an error for non-ok responses", async () => {
-			mockFetch.mockResolvedValueOnce({
-				ok: false,
-				status: 404,
-			});
+		it("returns raw HTML when not JSON", async () => {
+			const html = `<div>${"a".repeat(400)}</div>`;
+			mockFetch.mockResolvedValueOnce(mockTextResponse(html));
+			const result = await fetchDocument("https://api.example/doc", false);
+			expect(result).toBe(html);
+		});
 
-			await expect(fetchDocument("https://test.url", false)).rejects.toThrow();
+		it("throws 403 when 'convert it to Pro' message", async () => {
+			mockFetch.mockResolvedValueOnce(
+				mockTextResponse("To access the Privacy Policy for 1 convert it to Pro."),
+			);
+			await expect(fetchDocument("https://api.example/doc", false)).rejects.toMatchObject({
+				code: 403,
+			});
+		});
+
+		it("throws 404 on short invalid body", async () => {
+			mockFetch.mockResolvedValueOnce(mockTextResponse(""));
+			await expect(fetchDocument("https://api.example/doc", true)).rejects.toMatchObject({
+				code: 404,
+			});
+		});
+
+		it("throws when res.ok === false", async () => {
+			mockFetch.mockResolvedValueOnce(mockTextResponse("Not found", 404));
+			await expect(fetchDocument("https://api.example/doc", false)).rejects.toThrow();
 		});
 	});
 
 	describe("fetchAllDocuments", () => {
 		const logger = createMockLogger();
 		afterEach(() => {
-			vi.restoreAllMocks();
 			vi.clearAllMocks();
-		});
-
-		const mkResp = (content: string) => ({
-			ok: true,
-			status: 200,
-			json: () => Promise.resolve({ content }),
+			mockFetch.mockReset();
 		});
 
 		function stubAllOk() {
-			vi.stubGlobal(
-				"fetch",
-				vi.fn((input: any) => {
-					const url = String(input);
-					if (url.includes("/cookie-policy/")) return mkResp("cookie");
-					if (url.startsWith(TERMS_URL)) return mkResp("terms");
-					if (url.startsWith(PRIVACY_URL)) return mkResp("privacy");
-					throw new Error("unexpected url");
-				}),
-			);
+			mockFetch.mockImplementation((input: any) => {
+				const url = String(input);
+				if (url.includes("/cookie-policy/")) return mockJsonResponse({ content: "cookie" });
+				if (url.startsWith(TERMS_URL)) return mockJsonResponse({ content: "terms" });
+				if (url.startsWith(PRIVACY_URL)) return mockJsonResponse({ content: "privacy" });
+				return mockTextResponse("unexpected", 500);
+			});
 		}
 
 		it("returns a full store when every request succeeds", async () => {
@@ -104,16 +124,12 @@ describe("utility functions", () => {
 			expect(logger.info).toHaveBeenCalledTimes(3);
 		});
 
-		it("sets individual fields to null when a request fails", async () => {
-			vi.stubGlobal(
-				"fetch",
-				vi.fn((input: any) => {
-					const url = String(input);
-					if (url.includes("/cookie-policy/")) return { ok: false, status: 404 };
-					return mkResp("ok");
-				}),
-			);
-
+		it("sets individual field null when request fails", async () => {
+			mockFetch.mockImplementation((input: any) => {
+				const url = String(input);
+				if (url.includes("/cookie-policy/")) return mockTextResponse("convert it to Pro", 200); // 403 inside
+				return mockJsonResponse({ content: "ok" });
+			});
 			const store = await fetchAllDocuments(["a"], true, logger);
 			expect(store["a"].cookiePolicy).toBeNull();
 
