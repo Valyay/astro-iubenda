@@ -1,5 +1,12 @@
 # astro-iubenda
 
+## 0.2.0
+
+### Minor Changes
+
+- 7d85526: Live hot-reload for policies
+  Switched ESLint config to TypeScript rules
+
 ## 0.1.1
 
 ### Patch Changes
