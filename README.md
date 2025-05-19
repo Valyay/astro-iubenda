@@ -9,12 +9,31 @@ This Astro integration fetches and provides Iubenda Privacy Policy, Cookie Polic
 
 [Iubenda](https://www.iubenda.com/) is a popular service that helps websites comply with legal requirements for privacy policies and terms of service. This integration simplifies the process of fetching and displaying Iubenda legal documents in your Astro project.
 
-Key benefits:
+### Features
 
-- Automatically fetches your Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions
-- Provides content via a virtual module or writes to disk as JSON files
-- Can strip HTML markup for easier styling
-- Clean API to access documents in your components
+**🔄 Automatic document fetching** - Automatically fetches your Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions at build time.
+
+**🎯 Multiple access methods** - Access documents via a virtual module or as JSON files written to disk.
+
+**🔧 Flexible configuration** - Strip HTML markup for easier styling, configure output directories, and more.
+
+**⚡ Zero dependencies** - Lightweight integration with no external dependencies, keeping your project slim.
+
+**📦 Tiny footprint** - Only 1.89 kB (minified and gzipped). [Size Limit](https://github.com/ai/size-limit) controls the size.
+
+**🔍 SEO-friendly** - Properly renders legal documents for better search engine indexing.
+
+**🔥 HMR support** - Changes to configuration are reflected immediately with Hot Module Replacement.
+
+**🌐 Multilingual support** - Handle documents in multiple languages with ease.
+
+**📱 Responsive-ready content** - Works with any responsive design approach.
+
+**🧩 TypeScript native** - Full TypeScript support with proper typings for improved developer experience.
+
+**⚙️ Framework agnostic** - Works with any UI framework or vanilla HTML within your Astro project.
+
+**🔄 Compatible with all Astro rendering modes** - Works with SSG, SSR and hybrid rendering.
 
 ## Usage
 
@@ -111,6 +130,12 @@ Full object with all fetched documents, keyed by document ID.
 
 ```js
 import { documents } from "virtual:astro-iubenda";
+
+// Access all policies for a specific document ID
+const allPolicies = documents["12345678"];
+
+// Access a specific policy directly
+const privacyPolicy = documents["12345678"].privacyPolicy;
 ```
 
 ### getDocument(id, type)
@@ -146,6 +171,40 @@ import { getDocument } from 'virtual:astro-iubenda';
     <div set:html={getDocument('12345678', 'privacyPolicy')}></div>
   </body>
 </html>
+```
+
+### Using the documents object directly
+
+```astro
+---
+import { documents } from 'virtual:astro-iubenda';
+
+// Access all documents and their types for a specific ID
+const docId = '12345678';
+const allDocsForId = documents[docId];
+
+// Access specific documents directly
+const privacyPolicy = documents[docId].privacyPolicy;
+const cookiePolicy = documents[docId].cookiePolicy;
+const terms = documents[docId].termsAndConditions;
+---
+
+<h2>Available Documents</h2>
+<ul>
+  {privacyPolicy && <li><a href="/privacy">Privacy Policy</a></li>}
+  {cookiePolicy && <li><a href="/cookies">Cookie Policy</a></li>}
+  {terms && <li><a href="/terms">Terms and Conditions</a></li>}
+</ul>
+
+<!-- Using the full document object -->
+<div class="policies">
+  {Object.entries(allDocsForId).map(([type, content]) => (
+    <div class="policy-preview">
+      <h3>{type}</h3>
+      <div class="preview" set:html={content.substring(0, 200) + '...'} />
+    </div>
+  ))}
+</div>
 ```
 
 ### Multiple Documents
