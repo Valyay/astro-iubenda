@@ -1,5 +1,11 @@
 # astro-iubenda
 
+## 0.2.1
+
+### Patch Changes
+
+- c06ac8a: Increased robust of the integration
+
 ## 0.2.0
 
 ### Minor Changes
