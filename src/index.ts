@@ -48,27 +48,33 @@ export default function iubenda(opts: Options): AstroIntegration {
 	let viteServer: DevServer | undefined;
 
 	/* Helper: reload docs + push HMR                                       */
-	const refresh = async () => {
-		const logger = (viteServer?.config.logger ?? console) as unknown as AstroIntegrationLogger;
+	const refresh = async (providedLogger?: AstroIntegrationLogger) => {
+		const logger = (providedLogger ||
+			viteServer?.config?.logger ||
+			console) as unknown as AstroIntegrationLogger;
 
 		store = await fetchAllDocuments(documentIds, stripMarkup, logger);
 		virtualCode = generateVirtualCode(store);
 
 		if (!viteServer) return;
-		const mod = viteServer.moduleGraph.getModuleById(VIRTUAL_ID);
-		if (mod) viteServer.moduleGraph.invalidateModule(mod);
 
-		viteServer.ws.send({
-			type: "update",
-			updates: [
-				{
-					type: "js-update",
-					path: "virtual:astro-iubenda",
-					acceptedPath: "virtual:astro-iubenda",
-					timestamp: Date.now(),
-				},
-			],
-		});
+		// Skip HMR-related operations in test environment
+		if (viteServer.moduleGraph && viteServer.ws) {
+			const mod = viteServer.moduleGraph.getModuleById(VIRTUAL_ID);
+			if (mod) viteServer.moduleGraph.invalidateModule(mod);
+
+			viteServer.ws.send({
+				type: "update",
+				updates: [
+					{
+						type: "js-update",
+						path: "virtual:astro-iubenda",
+						acceptedPath: "virtual:astro-iubenda",
+						timestamp: Date.now(),
+					},
+				],
+			});
+		}
 	};
 
 	return {
@@ -95,22 +101,22 @@ export default function iubenda(opts: Options): AstroIntegration {
 
 				// Only fetch if not already fetched to prevent duplication
 				if (Object.keys(store).length === 0) {
-					await refresh();
+					await refresh(logger);
 				}
 
 				const WATCHED = [".env"];
-				server.watcher.add(WATCHED);
-				server.watcher.on("change", p => {
+				server?.watcher?.add(WATCHED);
+				server?.watcher?.on("change", p => {
 					if (!WATCHED.some(f => p.endsWith(f))) return;
 					logger.info(`🔄 ${p} changed → refreshing Iubenda docs`);
-					void refresh();
+					void refresh(logger);
 				});
 			},
 
 			"astro:build:start": async ({ logger }) => {
 				// Only refresh if store is empty to prevent duplicate fetches
 				if (Object.keys(store).length === 0) {
-					await refresh();
+					await refresh(logger);
 				}
 				if (saveInJson) {
 					await writeDocumentsToJson(store, projectRoot, outputDir, logger);

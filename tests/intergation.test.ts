@@ -88,18 +88,22 @@ describe("astro-iubenda", () => {
 				.mockResolvedValueOnce({
 					ok: true,
 					text: () => Promise.resolve(JSON.stringify({ content: "Privacy Policy Content" })),
+					json: () => Promise.resolve({ content: "Privacy Policy Content" }),
 				})
 				.mockResolvedValueOnce({
 					ok: true,
 					text: () => Promise.resolve(JSON.stringify({ content: "Cookie Policy Content" })),
+					json: () => Promise.resolve({ content: "Cookie Policy Content" }),
 				})
 				.mockResolvedValueOnce({
 					ok: true,
 					text: () => Promise.resolve(JSON.stringify({ content: "Terms & Conditions Content" })),
+					json: () => Promise.resolve({ content: "Terms & Conditions Content" }),
 				});
 
 			await integration.hooks["astro:server:setup"]?.({
 				logger,
+				server: {},
 			} as any);
 
 			expect(mockFetch).toHaveBeenCalledTimes(3);
@@ -119,14 +123,17 @@ describe("astro-iubenda", () => {
 			mockFetch
 				.mockResolvedValueOnce({
 					ok: true,
+					text: () => Promise.resolve(JSON.stringify({ content: "Privacy Policy Content" })),
 					json: () => Promise.resolve({ content: "Privacy Policy Content" }),
 				})
 				.mockResolvedValueOnce({
 					ok: true,
+					text: () => Promise.resolve(JSON.stringify({ content: "Cookie Policy Content" })),
 					json: () => Promise.resolve({ content: "Cookie Policy Content" }),
 				})
 				.mockResolvedValueOnce({
 					ok: true,
+					text: () => Promise.resolve(JSON.stringify({ content: "Terms & Conditions Content" })),
 					json: () => Promise.resolve({ content: "Terms & Conditions Content" }),
 				});
 
