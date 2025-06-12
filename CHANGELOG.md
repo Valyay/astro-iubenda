@@ -1,5 +1,11 @@
 # astro-iubenda
 
+## 0.3.0
+
+### Minor Changes
+
+- b60120b: Cookie Footer
+
 ## 0.2.1
 
 ### Patch Changes
