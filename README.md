@@ -11,29 +11,17 @@ This Astro integration fetches and provides Iubenda Privacy Policy, Cookie Polic
 
 ### Features
 
-**🔄 Automatic document fetching** - Automatically fetches your Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions at build time.
-
-**🎯 Multiple access methods** - Access documents via a virtual module or as JSON files written to disk.
-
-**🔧 Flexible configuration** - Strip HTML markup for easier styling, configure output directories, and more.
-
-**⚡ Zero dependencies** - Lightweight integration with no external dependencies, keeping your project slim.
-
-**📦 Tiny footprint** - Only 1.89 kB (minified and gzipped). [Size Limit](https://github.com/ai/size-limit) controls the size.
-
-**🔍 SEO-friendly** - Properly renders legal documents for better search engine indexing.
-
-**🔥 HMR support** - Changes to configuration are reflected immediately with Hot Module Replacement.
-
-**🌐 Multilingual support** - Handle documents in multiple languages with ease.
-
-**📱 Responsive-ready content** - Works with any responsive design approach.
-
-**🧩 TypeScript native** - Full TypeScript support with proper typings for improved developer experience.
-
-**⚙️ Framework agnostic** - Works with any UI framework or vanilla HTML within your Astro project.
-
-**🔄 Compatible with all Astro rendering modes** - Works with SSG, SSR and hybrid rendering.
+- **🔄 Automatic document fetching** - Automatically fetches your Iubenda Privacy Policy, Cookie Policy, and Terms & Conditions at build time.
+- **🎯 Multiple access methods** - Access documents via a virtual module or as JSON files written to disk.
+- **🔧 Flexible configuration** - Strip HTML markup for easier styling, configure output directories, and more.
+- **🍪 Cookie Solution Integration** - Built-in support for Iubenda Cookie Solution banner with Google Tag Manager integration.
+- **🧩 TypeScript native** - Full TypeScript support with proper typings for improved developer experience.
+- **⚡ Zero dependencies** - Lightweight integration with no external dependencies, keeping your project slim.
+- **📦 Tiny footprint** - Only 2.53 kB (minified and gzipped). [Size Limit](https://github.com/ai/size-limit) controls the size.
+- **🔥 HMR support** - Changes to configuration are reflected immediately with Hot Module Replacement.
+- **🌐 Multilingual support** - Handle documents in multiple languages with ease.
+- **⚙️ Framework agnostic** - Works with any UI framework or vanilla HTML within your Astro project.
+- **🔄 Compatible with all Astro rendering modes** - Works with SSG, SSR and hybrid rendering.
 
 ## Usage
 
@@ -84,8 +72,6 @@ export default defineConfig({
 });
 ```
 
-### Adding the Integration
-
 Then import the documents in your Astro components:
 
 ```astro
@@ -110,15 +96,66 @@ iubenda({
   saveInJson: true,
   outputDir: "src/content/iubenda",
   stripMarkup: true,
+  cookieFooter: {
+    iubendaOptions: {
+      // Your Iubenda Cookie Solution configuration
+    }
+  }
 });
 ```
 
-| Parameter     | Type                      | Required | Default                 | Description                                                                                      |
-| ------------- | ------------------------- | -------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `documentIds` | `Array<string \| number>` | Yes      | -                       | Array of Iubenda document IDs to fetch. You can find your document ID in your Iubenda dashboard. |
-| `saveInJson`  | `boolean`                 | No       | `false`                 | Whether to write the fetched documents to disk as JSON files.                                    |
-| `outputDir`   | `string`                  | No       | `'src/content/iubenda'` | Directory where JSON files will be written if `saveInJson` is true.                              |
-| `stripMarkup` | `boolean`                 | No       | `true`                  | Whether to strip HTML markup from the fetched documents.                                         |
+| Parameter      | Type                           | Required | Default                 | Description                                                                                      |
+| -------------- | ------------------------------ | -------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `documentIds`  | `Array<string \| number>`      | Yes      | -                       | Array of Iubenda document IDs to fetch. You can find your document ID in your Iubenda dashboard. |
+| `saveInJson`   | `boolean`                      | No       | `false`                 | Whether to write the fetched documents to disk as JSON files.                                    |
+| `outputDir`    | `string`                       | No       | `'src/content/iubenda'` | Directory where JSON files will be written if `saveInJson` is true.                              |
+| `stripMarkup`  | `boolean`                      | No       | `true`                  | Whether to strip HTML markup from the fetched documents.                                         |
+| `cookieFooter` | `false \| CookieFooterOptions` | No       | `false`                 | Configuration for Iubenda Cookie Solution banner.                                                |
+
+### Cookie Solution Configuration
+
+The integration supports Iubenda's Cookie Solution banner through the `cookieFooter` option. When enabled, it automatically injects the necessary scripts into your pages.
+
+```js
+iubenda({
+	documentIds: ["12345678"],
+	cookieFooter: {
+		// Required: The configuration object from your Iubenda dashboard
+		iubendaOptions: {
+			// Copy your _iub.csConfiguration object here
+		},
+		// Optional: Google Tag Manager integration
+		googleTagManagerOptions: true, // or customize with an object
+		// Optional: Where to inject the banner scripts
+		injectionStage: "head-inline", // or "page"
+	},
+});
+```
+
+#### Cookie Solution Options
+
+| Option                    | Type                                                        | Required | Default         | Description                                                                                              |
+| ------------------------- | ----------------------------------------------------------- | -------- | --------------- | -------------------------------------------------------------------------------------------------------- |
+| `iubendaOptions`          | `Record<string, unknown>`                                   | Yes      | -               | The `_iub.csConfiguration` object you copy from the Iubenda dashboard.                                   |
+| `googleTagManagerOptions` | `boolean \| { eventName?: string; dataLayerName?: string }` | No       | `false`         | Enable Google Tag Manager integration. Set to `true` to use defaults, or provide an object to customize. |
+| `injectionStage`          | `"head-inline" \| "page"`                                   | No       | `"head-inline"` | Where to inject the banner scripts. `"head-inline"` is recommended by Iubenda.                           |
+
+#### Google Tag Manager Integration
+
+When `googleTagManagerOptions` is enabled:
+
+- By default, it pushes an event named `iubenda_consent_given` to the `dataLayer` as explained by the official [Iubenda guide](https://www.iubenda.com/en/help/1235-google-tag-manager-blocking-cookies)
+- You can customize the event name and dataLayer name:
+
+```js
+cookieFooter: {
+  iubendaOptions: { /* ... */ },
+  googleTagManagerOptions: {
+    eventName: "cookie_consent_given",
+    dataLayerName: "customDataLayer"
+  }
+}
+```
 
 ## API
 
@@ -266,3 +303,4 @@ MIT - see [LICENSE](LICENSE) for details.
 ## Inspiration
 
 [gatsby-source-iubenda-documents](https://github.com/HeinrichTremblay/gatsby-source-iubenda-documents)
+[gatsby-plugin-iubenda-cookie-footer](https://github.com/NoriSte/gatsby-plugin-iubenda-cookie-footer)

@@ -6,12 +6,14 @@ import {
 	writeDocumentsToJson,
 	createVitePlugin,
 } from "./utils.js";
+import { buildCookieFooterScripts, type CookieFooterOptions } from "./cookieFooter.js";
 
 export interface Options {
 	documentIds: Array<number | string>;
 	saveInJson?: boolean;
 	outputDir?: string;
 	stripMarkup?: boolean;
+	cookieFooter?: false | CookieFooterOptions;
 }
 
 interface LoggerSubset {
@@ -40,6 +42,7 @@ export default function iubenda(opts: Options): AstroIntegration {
 		saveInJson = false,
 		outputDir = "src/content/iubenda",
 		stripMarkup = true,
+		cookieFooter = false,
 	} = opts;
 
 	let projectRoot: URL | undefined;
@@ -77,10 +80,12 @@ export default function iubenda(opts: Options): AstroIntegration {
 		}
 	};
 
+	const cookieScripts = buildCookieFooterScripts(cookieFooter);
+
 	return {
 		name: "astro-iubenda",
 		hooks: {
-			"astro:config:setup": ({ config, updateConfig, logger }) => {
+			"astro:config:setup": ({ config, updateConfig, logger, injectScript }) => {
 				projectRoot = (config as unknown as { root: URL }).root;
 
 				const vitePlugin = createVitePlugin(() => virtualCode);
@@ -94,6 +99,15 @@ export default function iubenda(opts: Options): AstroIntegration {
 				});
 
 				logger.info("✅ virtual:astro-iubenda registered");
+
+				// Inject Cookie‑Solution banner, if enabled
+				for (const script of cookieScripts) {
+					if (script) {
+						const { stage, code } = script;
+						injectScript(stage, code);
+					}
+					logger.info("🍪 Iubenda Cookie Solution banner injected");
+				}
 			},
 
 			"astro:server:setup": async ({ server, logger }) => {
