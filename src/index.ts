@@ -1,4 +1,4 @@
-import type { AstroIntegration, AstroIntegrationLogger } from "astro";
+import type { AstroIntegration, AstroIntegrationLogger, HookParameters } from "astro";
 import type { PolicySet } from "virtual:astro-iubenda";
 import {
 	fetchAllDocuments,
@@ -51,7 +51,7 @@ export default function iubenda(opts: Options): AstroIntegration {
 	let viteServer: DevServer | undefined;
 
 	/* Helper: reload docs + push HMR                                       */
-	const refresh = async (providedLogger?: AstroIntegrationLogger) => {
+	const refresh = async (providedLogger?: AstroIntegrationLogger): Promise<void> => {
 		const logger = (providedLogger ||
 			viteServer?.config?.logger ||
 			console) as unknown as AstroIntegrationLogger;
@@ -85,7 +85,12 @@ export default function iubenda(opts: Options): AstroIntegration {
 	return {
 		name: "astro-iubenda",
 		hooks: {
-			"astro:config:setup": ({ config, updateConfig, logger, injectScript }) => {
+			"astro:config:setup": ({
+				config,
+				updateConfig,
+				logger,
+				injectScript,
+			}: HookParameters<"astro:config:setup">): void => {
 				projectRoot = (config as unknown as { root: URL }).root;
 
 				const vitePlugin = createVitePlugin(() => virtualCode);
@@ -110,7 +115,10 @@ export default function iubenda(opts: Options): AstroIntegration {
 				}
 			},
 
-			"astro:server:setup": async ({ server, logger }) => {
+			"astro:server:setup": async ({
+				server,
+				logger,
+			}: HookParameters<"astro:server:setup">): Promise<void> => {
 				viteServer = server;
 
 				// Only fetch if not already fetched to prevent duplication
@@ -127,7 +135,9 @@ export default function iubenda(opts: Options): AstroIntegration {
 				});
 			},
 
-			"astro:build:start": async ({ logger }) => {
+			"astro:build:start": async ({
+				logger,
+			}: HookParameters<"astro:build:start">): Promise<void> => {
 				// Only refresh if store is empty to prevent duplicate fetches
 				if (Object.keys(store).length === 0) {
 					await refresh(logger);

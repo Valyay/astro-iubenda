@@ -32,6 +32,9 @@ export default tseslint.config(
 				tsconfigRootDir: import.meta.dirname,
 			},
 		},
+		rules: {
+			"@typescript-eslint/explicit-function-return-type": "error",
+		},
 	},
 	{
 		files: ["**/*.test.ts"],

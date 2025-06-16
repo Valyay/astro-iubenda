@@ -7,19 +7,19 @@ import type { PolicySet } from "virtual:astro-iubenda";
 export const PRIVACY_URL = "https://www.iubenda.com/api/privacy-policy/";
 export const TERMS_URL = "https://www.iubenda.com/api/terms-and-conditions/";
 
-export const formatContent = (content: string, stripMarkup: boolean) =>
+export const formatContent = (content: string, stripMarkup: boolean): string =>
 	stripMarkup ? content.replace(/"|\\/g, "") : content;
 
 const PRO_MSG_RE = /convert it to/i;
 const HTML_TAG_RE = /<\/?(p|div|h\d|ul|ol|li|section|br)\b/i;
 
-const buildError = (msg: string, code: number) => {
+const buildError = (msg: string, code: number): Error => {
 	const err = new Error(msg);
 	(err as unknown as { code: number }).code = code;
 	return err;
 };
 
-export const fetchDocument = async (url: string, stripMarkup: boolean) => {
+export const fetchDocument = async (url: string, stripMarkup: boolean): Promise<string> => {
 	const res = await fetch(`${url}/no-markup`);
 
 	if (!res.ok) {
@@ -53,7 +53,7 @@ export const handleApiError = (
 	name: string,
 	id: string | number,
 	logger: AstroIntegrationLogger,
-) => {
+): void => {
 	// Error codes from https://www.iubenda.com/en/help/78-privacy-policy-direct-text-embedding-api#api
 	const statusCode = (error as { code?: number }).code || 0;
 
@@ -77,7 +77,7 @@ export const fetchAllDocuments = async (
 	documentIds: Array<number | string>,
 	stripMarkup: boolean,
 	logger: AstroIntegrationLogger,
-) => {
+): Promise<Record<string, PolicySet>> => {
 	const store: Record<string, PolicySet> = {};
 
 	await Promise.all(
@@ -116,7 +116,7 @@ export const fetchAllDocuments = async (
 	return store;
 };
 
-export const generateVirtualCode = (store: Record<string, PolicySet>) => `
+export const generateVirtualCode = (store: Record<string, PolicySet>): string => `
 export const documents = ${JSON.stringify(store, null, 2)};
 export const getDocument = (id, type='privacyPolicy') => documents[id]?.[type] ?? null;
 export default documents;`;
@@ -126,7 +126,7 @@ export const writeDocumentsToJson = async (
 	projectRoot: URL | undefined,
 	outputDir: string,
 	logger: AstroIntegrationLogger,
-) => {
+): Promise<void> => {
 	if (!projectRoot) return;
 
 	const dir = path.join(fileURLToPath(projectRoot), outputDir);
@@ -144,15 +144,22 @@ export const writeDocumentsToJson = async (
 	logger.info(`💾 Iubenda JSON-files written to ${path.relative(fileURLToPath(projectRoot), dir)}`);
 };
 
-export const createVitePlugin = (codeOrGetter: string | (() => string)) => {
-	const getCode = typeof codeOrGetter === "function" ? codeOrGetter : () => codeOrGetter;
+export const createVitePlugin = (
+	codeOrGetter: string | (() => string),
+): {
+	name: string;
+	resolveId(id: string): string | undefined;
+	load(id: string): string | undefined;
+} => {
+	const getCode: () => string =
+		typeof codeOrGetter === "function" ? codeOrGetter : (): string => codeOrGetter;
 
 	return {
 		name: "astro-iubenda",
-		resolveId(id: string) {
+		resolveId(id: string): string | undefined {
 			return id === "virtual:astro-iubenda" ? "\0virtual:astro-iubenda" : undefined;
 		},
-		load(id: string) {
+		load(id: string): string | undefined {
 			return id === "\0virtual:astro-iubenda" ? getCode() : undefined;
 		},
 	};

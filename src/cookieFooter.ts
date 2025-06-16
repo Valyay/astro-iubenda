@@ -23,7 +23,12 @@ export interface CookieFooterOptions {
 	injectionStage?: "head-inline" | "page";
 }
 
-export const buildCookieFooterScripts = (cookieFooter?: CookieFooterOptions | false) => {
+export const buildCookieFooterScripts = (
+	cookieFooter?: CookieFooterOptions | false,
+): {
+	stage: InjectedScriptStage;
+	code: string;
+}[] => {
 	if (!cookieFooter) return [];
 
 	const { iubendaOptions, googleTagManagerOptions, injectionStage = "head-inline" } = cookieFooter;
@@ -46,7 +51,7 @@ export const buildCookieFooterScripts = (cookieFooter?: CookieFooterOptions | fa
 	const configSnippet = `var _iub=_iub||[];\n_iub.csConfiguration=${JSON.stringify(iubendaOptions)};${gtmCallbacks}`;
 
 	/* helper to inject external script via DOM */
-	const addScript = (src: string, attrs = "") =>
+	const addScript = (src: string, attrs = ""): string =>
 		`(()=>{var s=document.createElement('script');s.src='${src}';s.async=true;${attrs}document.head.appendChild(s);})();`;
 
 	const siteId = (iubendaOptions as { siteId?: number | string }).siteId;

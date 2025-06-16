@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import iubenda from "../src/index.js";
 import { promises as fs } from "node:fs";
 
-const createMockLogger = () => ({
+const createMockLogger = (): { info: Mock; warn: Mock; error: Mock } => ({
 	info: vi.fn(),
 	warn: vi.fn(),
 	error: vi.fn(),

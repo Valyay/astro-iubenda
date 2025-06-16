@@ -11,7 +11,7 @@ import {
 	PRIVACY_URL,
 } from "../src/utils.js";
 
-const createMockLogger = () => {
+const createMockLogger = (): AstroIntegrationLogger => {
 	const logger = {
 		info: vi.fn<[message: string], void>(),
 		warn: vi.fn<[message: string], void>(),
@@ -21,15 +21,20 @@ const createMockLogger = () => {
 };
 
 // Helpers for building fake Fetch API Response objects
-const mockJsonResponse = (obj: unknown) => ({
+const mockJsonResponse = (
+	obj: unknown,
+): { ok: boolean; status: number; text: () => Promise<string> } => ({
 	ok: true,
 	status: 200,
-	text: () => Promise.resolve(JSON.stringify(obj)),
+	text: (): Promise<string> => Promise.resolve(JSON.stringify(obj)),
 });
-const mockTextResponse = (text: string, status = 200) => ({
+const mockTextResponse = (
+	text: string,
+	status = 200,
+): { ok: boolean; status: number; text: () => Promise<string> } => ({
 	ok: status >= 200 && status < 300,
 	status,
-	text: () => Promise.resolve(text),
+	text: (): Promise<string> => Promise.resolve(text),
 });
 
 const mockFetch = vi.fn();
@@ -99,7 +104,7 @@ describe("utility functions", () => {
 			mockFetch.mockReset();
 		});
 
-		function stubAllOk() {
+		function stubAllOk(): void {
 			mockFetch.mockImplementation((input: any) => {
 				const url = String(input);
 				if (url.includes("/cookie-policy/")) return mockJsonResponse({ content: "cookie" });
