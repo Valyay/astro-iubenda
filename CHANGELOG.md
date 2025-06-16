@@ -1,5 +1,13 @@
 # astro-iubenda
 
+## 0.3.1
+
+### Patch Changes
+
+- 4b03a22: - Add explicit-function-return-type rule
+- 9ce5176: Update README to include example image
+- e81e78c: Update Node.js version to 20.x
+
 ## 0.3.0
 
 ### Minor Changes
