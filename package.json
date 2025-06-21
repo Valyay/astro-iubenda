@@ -12,8 +12,16 @@
     "astro-integration",
     "iubenda",
     "privacy-policy",
-    "terms and conditions",
-    "cookie-policy"
+    "terms-and-conditions",
+    "consent",
+    "cookie-banner",
+    "cookie-policy",
+    "cookie-consent-banner",
+    "consent-management",
+    "cmp",
+    "gdpr",
+    "lgpd",
+    "ccpa"
   ],
   "author": "Evgeniy Valyaev <dev.valyay@gmail.com>",
   "license": "MIT",
