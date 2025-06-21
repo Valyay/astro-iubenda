@@ -16,7 +16,7 @@ This Astro integration fetches and provides Iubenda Privacy Policy, Cookie Polic
 - **🍪 Cookie Solution Integration** - Built-in support for Iubenda Cookie Solution banner with Google Tag Manager integration.
 - **🧩 TypeScript native** - Full TypeScript support with proper typings for improved developer experience.
 - **⚡ Zero dependencies** - Lightweight integration with no external dependencies, keeping your project slim.
-- **📦 Tiny footprint** - Only 2.6 kB (minified and gzipped). [Size Limit](https://github.com/ai/size-limit) controls the size.
+- **📦 Tiny footprint** - Only 2.31 kB (minified and gzipped). [Size Limit](https://github.com/ai/size-limit) controls the size.
 - **🔥 HMR support** - Changes to configuration are reflected immediately with Hot Module Replacement.
 - **🌐 Multilingual support** - Handle documents in multiple languages with ease.
 - **⚙️ Framework agnostic** - Works with any UI framework or vanilla HTML within your Astro project.
