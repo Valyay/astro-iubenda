@@ -1,5 +1,14 @@
 # astro-iubenda
 
+## 0.4.0
+
+### Minor Changes
+
+- 3bac3ac: Update size limit
+- 6930242: Update dependencies
+- a089f2a: Update size limit
+- d1e53d0: Improved IubendaOptions, added new examples in README, updated tests
+
 ## 0.3.1
 
 ### Patch Changes
