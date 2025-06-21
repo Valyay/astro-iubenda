@@ -109,7 +109,7 @@ iubenda({
 | `saveInJson`   | `boolean`                      | No       | `false`                 | Whether to write the fetched documents to disk as JSON files.                                    |
 | `outputDir`    | `string`                       | No       | `'src/content/iubenda'` | Directory where JSON files will be written if `saveInJson` is true.                              |
 | `stripMarkup`  | `boolean`                      | No       | `true`                  | Whether to strip HTML markup from the fetched documents.                                         |
-| `cookieFooter` | `false \| CookieFooterOptions` | No       | `false`                 | Configuration for Iubenda Cookie Solution banner.                                                |
+| `cookieFooter` | `false \| CookieFooterOptions` | No       | `false`                 | Configuration for Iubenda Cookie Solution banner. See TypeScript types for full options.         |
 
 ### Cookie Solution Configuration
 
@@ -121,12 +121,17 @@ iubenda({
 	cookieFooter: {
 		// Required: The configuration object from your Iubenda dashboard
 		iubendaOptions: {
-			// Copy your _iub.csConfiguration object here
+			siteId: 12345678,
+			cookiePolicyId: 87654321,
+			lang: "en",
+			// Add any other Iubenda configuration options
 		},
 		// Optional: Google Tag Manager integration
 		googleTagManagerOptions: true, // or customize with an object
 		// Optional: Where to inject the banner scripts
 		injectionStage: "head-inline", // or "page"
+		// Optional: Banner version to use
+		bannerVersion: "current", // "current", "beta", or "stable"
 	},
 });
 ```
@@ -135,9 +140,10 @@ iubenda({
 
 | Option                    | Type                                                        | Required | Default         | Description                                                                                              |
 | ------------------------- | ----------------------------------------------------------- | -------- | --------------- | -------------------------------------------------------------------------------------------------------- |
-| `iubendaOptions`          | `Record<string, unknown>`                                   | Yes      | -               | The `_iub.csConfiguration` object you copy from the Iubenda dashboard.                                   |
+| `iubendaOptions`          | `IubendaOptions`                                            | Yes      | -               | The `_iub.csConfiguration` object you copy from the Iubenda dashboard.                                   |
 | `googleTagManagerOptions` | `boolean \| { eventName?: string; dataLayerName?: string }` | No       | `false`         | Enable Google Tag Manager integration. Set to `true` to use defaults, or provide an object to customize. |
 | `injectionStage`          | `"head-inline" \| "page"`                                   | No       | `"head-inline"` | Where to inject the banner scripts. `"head-inline"` is recommended by Iubenda.                           |
+| `bannerVersion`           | `"current" \| "beta" \| "stable"`                           | No       | `"current"`     | The version of the Iubenda banner to use.                                                                |
 
 #### Google Tag Manager Integration
 
@@ -159,6 +165,33 @@ cookieFooter: {
 ## API
 
 The integration provides a virtual module that you can import in your components.
+
+### Type Definitions
+
+The integration exports comprehensive TypeScript types for better development experience:
+
+```ts
+// Import types for configuration
+import type {
+	CookieFooterOptions,
+	IubendaOptions,
+	IubendaCallbacks,
+	HexColor,
+	BannerVersion,
+	TcfPurposesKeys,
+	ConsentEventName,
+} from "astro-iubenda";
+```
+
+**Available Types:**
+
+- `CookieFooterOptions` - Main configuration interface for cookie footer
+- `IubendaOptions` - Complete Iubenda configuration object
+- `IubendaCallbacks` - All available callback functions
+- `HexColor` - Type-safe hex color string (`#${string}`)
+- `BannerVersion` - Banner version options (`"current"`, `"beta"`, `"stable"`)
+- `TcfPurposesKeys` - TCF purpose IDs (`"1"` through `"10"`)
+- `ConsentEventName` - Consent event types for callbacks
 
 ### documents
 
@@ -287,6 +320,268 @@ import { documents } from 'virtual:astro-iubenda';
 </script>
 ```
 
+### Cookie Solution with Callbacks
+
+```ts
+import type { IubendaCallbacks, ConsentEventName } from "astro-iubenda";
+
+const callbacks: IubendaCallbacks = {
+	onReady: (hasConsent: boolean) => {
+		console.log("Iubenda ready, has consent:", hasConsent);
+	},
+	onBannerShown: () => {
+		console.log("Banner shown");
+	},
+	onBannerClosed: () => {
+		console.log("Banner closed");
+	},
+	onConsentGiven: (consent: boolean) => {
+		console.log("Consent given:", consent);
+		// Enable analytics, tracking, etc.
+	},
+	onConsentFirstGiven: (event: ConsentEventName) => {
+		console.log("First consent given via:", event);
+		// Track conversion event
+	},
+	onConsentRejected: () => {
+		console.log("Consent rejected");
+		// Disable tracking
+	},
+	onPreferenceExpressed: (preferences: unknown) => {
+		console.log("User preferences:", preferences);
+	},
+	onPreferenceNotNeeded: () => {
+		console.log("No preference needed for this user");
+	},
+	onCcpaOptOut: () => {
+		console.log("User opted out (CCPA)");
+	},
+	onError: (message: string) => {
+		console.error("Iubenda error:", message);
+	},
+};
+
+// Use in your config
+export default defineConfig({
+	integrations: [
+		iubenda({
+			documentIds: ["12345678"],
+			cookieFooter: {
+				iubendaOptions: {
+					siteId: 12345678,
+					cookiePolicyId: 87654321,
+					lang: "en",
+					callback: callbacks,
+				},
+			},
+		}),
+	],
+});
+```
+
+### Custom Colors and Theming
+
+```ts
+import type { HexColor } from "astro-iubenda";
+
+// Type-safe hex color definitions
+const brandColors = {
+	primary: "#0073aa" as HexColor,
+	secondary: "#005177" as HexColor,
+	accent: "#00a0d2" as HexColor,
+	dark: "#1e1e1e" as HexColor,
+	light: "#f7f7f7" as HexColor,
+} as const;
+
+export default defineConfig({
+	integrations: [
+		iubenda({
+			documentIds: ["12345678"],
+			cookieFooter: {
+				iubendaOptions: {
+					siteId: 12345678,
+					cookiePolicyId: 87654321,
+					lang: "en",
+					banner: {
+						backgroundColor: brandColors.dark,
+						textColor: brandColors.light,
+						acceptButtonColor: brandColors.primary,
+						acceptButtonCaptionColor: brandColors.light,
+						customizeButtonColor: brandColors.secondary,
+						customizeButtonCaptionColor: brandColors.light,
+						rejectButtonColor: brandColors.accent,
+						rejectButtonCaptionColor: brandColors.light,
+						brandTextColor: brandColors.primary,
+						brandBackgroundColor: brandColors.light,
+					},
+					floatingPreferencesButtonColor: brandColors.primary,
+					floatingPreferencesButtonCaptionColor: brandColors.light,
+				},
+			},
+		}),
+	],
+});
+```
+
+### Multi-language Setup with Different Configurations
+
+```ts
+// Define configurations for different languages/regions
+const configs = {
+	en: {
+		siteId: 12345678,
+		cookiePolicyId: 87654321,
+		lang: "en",
+		enableGdpr: true,
+		enableCcpa: true,
+	},
+	es: {
+		siteId: 12345678,
+		cookiePolicyId: 11111111,
+		lang: "es",
+		enableGdpr: true,
+		enableLgpd: true,
+	},
+	de: {
+		siteId: 12345678,
+		cookiePolicyId: 22222222,
+		lang: "de",
+		enableGdpr: true,
+		gdprAppliesGlobally: true,
+	},
+} as const;
+
+export default defineConfig({
+	integrations: [
+		iubenda({
+			documentIds: ["87654321", "11111111", "22222222"],
+			cookieFooter: {
+				// Use the English config as default
+				iubendaOptions: configs.en,
+				googleTagManagerOptions: true,
+			},
+		}),
+	],
+});
+```
+
+### Advanced Cookie Solution Examples
+
+**GDPR Configuration:**
+
+```js
+cookieFooter: {
+  iubendaOptions: {
+    siteId: 12345678,
+    cookiePolicyId: 87654321,
+    lang: "en",
+    enableGdpr: true,
+    gdprAppliesGlobally: false,
+    perPurposeConsent: true,
+    purposes: "1,2,3,4,5",
+  }
+}
+```
+
+**Custom Banner Styling:**
+
+```js
+cookieFooter: {
+  iubendaOptions: {
+    siteId: 12345678,
+    cookiePolicyId: 87654321,
+    lang: "en",
+    banner: {
+      position: "float-bottom-right",
+      acceptButtonDisplay: true,
+      customizeButtonDisplay: true,
+      rejectButtonDisplay: true,
+      backgroundColor: "#000000",
+      textColor: "#ffffff",
+      acceptButtonColor: "#0073aa",
+      acceptButtonCaptionColor: "#ffffff",
+      customizeButtonColor: "#dadada",
+      customizeButtonCaptionColor: "#000000",
+      rejectButtonColor: "#0073aa",
+      rejectButtonCaptionColor: "#ffffff",
+    }
+  }
+}
+```
+
+**CCPA (California) Configuration:**
+
+```js
+cookieFooter: {
+  iubendaOptions: {
+    siteId: 12345678,
+    cookiePolicyId: 87654321,
+    lang: "en",
+    enableCcpa: true,
+    ccpaApplies: true,
+    ccpaNoticeDisplay: true,
+    ccpaAcknowledgeOnDisplay: true,
+  },
+  googleTagManagerOptions: {
+    eventName: "ccpa_consent_given",
+    dataLayerName: "dataLayer"
+  }
+}
+```
+
+**IAB TCF v2 Configuration:**
+
+```js
+cookieFooter: {
+  iubendaOptions: {
+    siteId: 12345678,
+    cookiePolicyId: 87654321,
+    lang: "en",
+    enableTcf: true,
+    googleAdditionalConsentMode: true,
+    tcfPurposes: {
+      "1": "consent_only",
+      "2": "consent_only",
+      "3": "li_only",
+      "4": "consent_not_needed"
+    },
+    askConsentIfCMPNotFound: true,
+  }
+}
+```
+
+**Multi-compliance Setup (GDPR + CCPA + LGPD):**
+
+```js
+cookieFooter: {
+  iubendaOptions: {
+    siteId: 12345678,
+    cookiePolicyId: 87654321,
+    lang: "en",
+    countryDetection: true,
+    // GDPR
+    enableGdpr: true,
+    gdprAppliesGlobally: false,
+    // CCPA
+    enableCcpa: true,
+    ccpaApplies: true,
+    // LGPD
+    enableLgpd: true,
+    lgpdAppliesGlobally: false,
+    // UI Configuration
+    banner: {
+      acceptButtonDisplay: true,
+      customizeButtonDisplay: true,
+      rejectButtonDisplay: true,
+      listPurposes: true,
+      showPurposesToggles: true,
+    }
+  },
+  googleTagManagerOptions: true,
+  bannerVersion: "current"
+}
+```
+
 ## Contributing
 
 You're welcome to submit an issue or PR!
@@ -302,4 +597,5 @@ MIT - see [LICENSE](LICENSE) for details.
 ## Inspiration
 
 [gatsby-source-iubenda-documents](https://github.com/HeinrichTremblay/gatsby-source-iubenda-documents)
+
 [gatsby-plugin-iubenda-cookie-footer](https://github.com/NoriSte/gatsby-plugin-iubenda-cookie-footer)

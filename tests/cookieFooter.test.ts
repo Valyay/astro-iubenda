@@ -13,8 +13,9 @@ describe("buildCookieFooterScripts", () => {
 	it("generates basic scripts with default injection stage", () => {
 		const options: CookieFooterOptions = {
 			iubendaOptions: {
-				siteId: "12345",
-				cookiePolicyId: "67890",
+				siteId: 12345,
+				cookiePolicyId: 67890,
+				lang: "en",
 			},
 		};
 
@@ -24,7 +25,7 @@ describe("buildCookieFooterScripts", () => {
 		expect(result[0]).toEqual({
 			stage: "head-inline",
 			code: expect.stringContaining(
-				'_iub.csConfiguration={"siteId":"12345","cookiePolicyId":"67890"}',
+				'_iub.csConfiguration={"siteId":12345,"cookiePolicyId":67890,"lang":"en"}',
 			),
 		});
 		expect(result[1]).toEqual({
@@ -44,7 +45,9 @@ describe("buildCookieFooterScripts", () => {
 	it("generates scripts with custom injection stage", () => {
 		const options: CookieFooterOptions = {
 			iubendaOptions: {
-				siteId: "12345",
+				siteId: 12345,
+				lang: "en",
+				cookiePolicyId: 67890,
 			},
 			injectionStage: "page",
 		};
@@ -61,7 +64,9 @@ describe("buildCookieFooterScripts", () => {
 	it("includes GTM script when googleTagManagerOptions is true", () => {
 		const options: CookieFooterOptions = {
 			iubendaOptions: {
-				siteId: "12345",
+				siteId: 12345,
+				lang: "en",
+				cookiePolicyId: 67890,
 			},
 			googleTagManagerOptions: true,
 		};
@@ -92,7 +97,9 @@ describe("buildCookieFooterScripts", () => {
 	it("supports custom GTM event and dataLayer names", () => {
 		const options: CookieFooterOptions = {
 			iubendaOptions: {
-				siteId: "12345",
+				siteId: 12345,
+				lang: "en",
+				cookiePolicyId: 67890,
 			},
 			googleTagManagerOptions: {
 				eventName: "custom_consent",

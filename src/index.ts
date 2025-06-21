@@ -149,3 +149,13 @@ export default function iubenda(opts: Options): AstroIntegration {
 		},
 	};
 }
+
+export type {
+	CookieFooterOptions,
+	HexColor,
+	BannerVersion,
+	TcfPurposesKeys,
+	ConsentEventName,
+	IubendaCallbacks,
+	IubendaOptions,
+} from "./cookieFooter.js";
