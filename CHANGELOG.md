@@ -1,5 +1,11 @@
 # astro-iubenda
 
+## 0.4.1
+
+### Patch Changes
+
+- 206eced: Updated keywords
+
 ## 0.4.0
 
 ### Minor Changes
