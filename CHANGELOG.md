@@ -1,5 +1,11 @@
 # astro-iubenda
 
+## 0.4.2
+
+### Patch Changes
+
+- e3948f0: Update deps
+
 ## 0.4.1
 
 ### Patch Changes
