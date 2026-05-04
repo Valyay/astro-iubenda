@@ -259,6 +259,68 @@ export interface CookieFooterOptions {
 	bannerVersion?: BannerVersion;
 }
 
+const SAFE_IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
+
+const assertSafeIdentifier = (value: string, field: string): void => {
+	if (!SAFE_IDENTIFIER.test(value)) {
+		throw new Error(
+			`astro-iubenda: ${field} must be a valid JS identifier (received ${JSON.stringify(value)})`,
+		);
+	}
+};
+
+/**
+ * GTM event-name allowlist. Covers all real-world conventions
+ * (snake_case, camelCase, dotted, hyphenated) and rejects anything that
+ * could break out of a single-quoted JS literal or the surrounding
+ * <script> tag (quotes, backticks, semicolons, `<`, whitespace, etc.).
+ */
+const SAFE_EVENT_NAME = /^[A-Za-z0-9_.-]+$/;
+
+const assertSafeEventName = (value: string, field: string): void => {
+	if (!SAFE_EVENT_NAME.test(value)) {
+		throw new Error(
+			`astro-iubenda: ${field} must match /^[A-Za-z0-9_.-]+$/ (received ${JSON.stringify(value)})`,
+		);
+	}
+};
+
+/**
+ * Prevents JSON from breaking out of <script>...</script>.
+ * - `<` → `<` so `</script>` cannot terminate the inline tag.
+ * - U+2028 / U+2029 → `\uXXXX` (JSON.stringify leaves these as raw chars,
+ *   but they are illegal inside an inline <script>).
+ */
+const escapeForInlineScript = (json: string): string =>
+	json
+		.replace(/</g, "\\u003c")
+		.replace(/\u2028/g, "\\u2028")
+		.replace(/\u2029/g, "\\u2029");
+
+/**
+ * TODO (learning): implement this to safely interpolate a user-supplied string
+ * into a single-quoted inline JS string literal, e.g.
+ *
+ *     dataLayer.push({event:'<HERE>'})
+ *
+ * Today the eventName surface is closed by `assertSafeEventName` (strict
+ * allowlist), so this stub is NOT load-bearing for security — it is here as a
+ * seam in case the allowlist is ever relaxed.
+ *
+ * A real implementation must not allow the value to:
+ *   1. Break out of the surrounding `'...'` literal (backslash, quote, newline).
+ *   2. Break out of the surrounding `<script>...</script>` tag (`</script>`,
+ *      U+2028, U+2029).
+ *
+ * Trade-offs to consider:
+ *   - regex `.replace()` chain vs character-by-character escape with a lookup map
+ *   - whether to escape `>` and `&` (defensive vs minimal)
+ *   - whether to allow CR/LF or normalise them
+ */
+const escapeJsStringLiteral = (raw: string): string => {
+	return raw;
+};
+
 const addScript = (src: string, attrs = ""): string =>
 	`(()=>{var s=document.createElement('script');s.src='${src}';s.async=true;${attrs}document.head.appendChild(s);})();`;
 
@@ -279,22 +341,29 @@ export const buildCookieFooterScripts = (
 
 	const versionPath = bannerVersion === "current" ? "" : `/${bannerVersion}`;
 
-	const eventName =
+	const rawEventName =
 		typeof googleTagManagerOptions === "object" && googleTagManagerOptions?.eventName
 			? googleTagManagerOptions.eventName
 			: "iubenda_consent_given";
+	if (googleTagManagerOptions)
+		assertSafeEventName(rawEventName, "googleTagManagerOptions.eventName");
+	const eventName = escapeJsStringLiteral(rawEventName);
 
 	const dataLayerName =
 		typeof googleTagManagerOptions === "object" && googleTagManagerOptions?.dataLayerName
 			? googleTagManagerOptions.dataLayerName
 			: "dataLayer";
+	if (googleTagManagerOptions)
+		assertSafeIdentifier(dataLayerName, "googleTagManagerOptions.dataLayerName");
 
 	/* inline _iub.csConfiguration */
 	const gtmCallbacks = googleTagManagerOptions
 		? `\n// GTM events\n_iub.csConfiguration.onConsentGiven=function(payload){\n  window.${dataLayerName}=window.${dataLayerName}||[];\n  window.${dataLayerName}.push({event:'${eventName}'});\n  if(payload && payload.purposes){\n    payload.purposes.forEach(function(pid){\n      window.${dataLayerName}.push({event:'iubenda_consent_given_purpose_'+pid});\n    });\n  }\n};\n_iub.csConfiguration.onPreferenceNotNeeded=function(){\n  window.${dataLayerName}=window.${dataLayerName}||[];\n  window.${dataLayerName}.push({event:'iubenda_preference_not_needed'});\n};\n_iub.csConfiguration.onCcpaOptedOut=function(){\n  window.${dataLayerName}=window.${dataLayerName}||[];\n  window.${dataLayerName}.push({event:'iubenda_ccpa_opted_out'});\n};`
 		: "";
 
-	const configSnippet = `var _iub=_iub||[];\n_iub.csConfiguration=${JSON.stringify(iubendaOptions)};${gtmCallbacks}`;
+	const configSnippet = escapeForInlineScript(
+		`var _iub=_iub||[];\n_iub.csConfiguration=${JSON.stringify(iubendaOptions)};${gtmCallbacks}`,
+	);
 
 	const siteId = iubendaOptions.siteId;
 
@@ -329,7 +398,9 @@ export const buildCookieFooterScripts = (
 
 	/* SPA navigation — fire GTM event again if consent already given */
 	if (googleTagManagerOptions) {
-		const spaSnippet = `document.addEventListener('astro:after-swap',function(){if(window._iub?.cs?.consent_given){window.${dataLayerName}=window.${dataLayerName}||[];window.${dataLayerName}.push({event:'${eventName}'})}});`;
+		const spaSnippet = escapeForInlineScript(
+			`document.addEventListener('astro:after-swap',function(){if(window._iub?.cs?.consent_given){window.${dataLayerName}=window.${dataLayerName}||[];window.${dataLayerName}.push({event:'${eventName}'})}});`,
+		);
 		snippets.push({ stage: injectionStage, code: spaSnippet });
 	}
 

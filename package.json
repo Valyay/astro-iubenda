@@ -35,7 +35,6 @@
   "types": "./dist/index.d.ts",
   "exports": "./dist/index.js",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "clean": "node --input-type=commonjs -e \"const {rmSync}=require('node:fs');for (const p of ['dist','pnpm-lock.yaml','.pnpm-debug.log','node_modules']) rmSync(p,{recursive:true,force:true})\"",
     "typecheck": "tsc --noEmit --pretty",
     "test:pub": "pnpm publish --dry-run --no-git-checks",
@@ -81,7 +80,7 @@
   "size-limit": [
     {
       "path": "dist/index.js",
-      "limit": "2.314 kB"
+      "limit": "2.5 kB"
     }
   ],
   "engines": {

@@ -16,7 +16,7 @@ This Astro integration fetches and provides Iubenda Privacy Policy, Cookie Polic
 - **🍪 Cookie Solution Integration** - Built-in support for Iubenda Cookie Solution banner with Google Tag Manager integration.
 - **🧩 TypeScript native** - Full TypeScript support with proper typings for improved developer experience.
 - **⚡ Zero dependencies** - Lightweight integration with no external dependencies, keeping your project slim.
-- **📦 Tiny footprint** - Only 2.31 kB (minified and gzipped). [Size Limit](https://github.com/ai/size-limit) controls the size.
+- **📦 Tiny footprint** - ~2.42 kB (minified and brotlied). [Size Limit](https://github.com/ai/size-limit) controls the size.
 - **🔥 HMR support** - Changes to configuration are reflected immediately with Hot Module Replacement.
 - **🌐 Multilingual support** - Handle documents in multiple languages with ease.
 - **⚙️ Framework agnostic** - Works with any UI framework or vanilla HTML within your Astro project.
@@ -150,6 +150,8 @@ iubenda({
 When `googleTagManagerOptions` is enabled:
 
 - By default, it pushes an event named `iubenda_consent_given` to the `dataLayer` as explained by the official [Iubenda guide](https://www.iubenda.com/en/help/1235-google-tag-manager-blocking-cookies)
+- `dataLayerName` must be a valid JavaScript identifier (matches `/^[A-Za-z_$][\w$]*$/`); the integration throws at build time otherwise. This matches GTM's own convention (the value is used as `window[name]`).
+- `eventName` must match `/^[A-Za-z0-9_.-]+$/` (letters, digits, `_`, `.`, `-`). Covers all standard GTM event-naming conventions; the integration throws at build time otherwise.
 - You can customize the event name and dataLayer name:
 
 ```js
