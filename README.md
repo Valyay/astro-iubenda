@@ -117,22 +117,22 @@ The integration supports Iubenda's Cookie Solution banner through the `cookieFoo
 
 ```js
 iubenda({
-	documentIds: ["12345678"],
-	cookieFooter: {
-		// Required: The configuration object from your Iubenda dashboard
-		iubendaOptions: {
-			siteId: 12345678,
-			cookiePolicyId: 87654321,
-			lang: "en",
-			// Add any other Iubenda configuration options
-		},
-		// Optional: Google Tag Manager integration
-		googleTagManagerOptions: true, // or customize with an object
-		// Optional: Where to inject the banner scripts
-		injectionStage: "head-inline", // or "page"
-		// Optional: Banner version to use
-		bannerVersion: "current", // "current", "beta", or "stable"
-	},
+  documentIds: ["12345678"],
+  cookieFooter: {
+    // Required: The configuration object from your Iubenda dashboard
+    iubendaOptions: {
+      siteId: 12345678,
+      cookiePolicyId: 87654321,
+      lang: "en",
+      // Add any other Iubenda configuration options
+    },
+    // Optional: Google Tag Manager integration
+    googleTagManagerOptions: true, // or customize with an object
+    // Optional: Where to inject the banner scripts
+    injectionStage: "head-inline", // or "page"
+    // Optional: Banner version to use
+    bannerVersion: "current", // "current", "beta", or "stable"
+  },
 });
 ```
 
@@ -173,13 +173,13 @@ The integration exports comprehensive TypeScript types for better development ex
 ```ts
 // Import types for configuration
 import type {
-	CookieFooterOptions,
-	IubendaOptions,
-	IubendaCallbacks,
-	HexColor,
-	BannerVersion,
-	TcfPurposesKeys,
-	ConsentEventName,
+  CookieFooterOptions,
+  IubendaOptions,
+  IubendaCallbacks,
+  HexColor,
+  BannerVersion,
+  TcfPurposesKeys,
+  ConsentEventName,
 } from "astro-iubenda";
 ```
 
@@ -284,12 +284,12 @@ import { defineConfig } from "astro/config";
 import iubenda from "astro-iubenda";
 
 export default defineConfig({
-	integrations: [
-		iubenda({
-			documentIds: ["12345678", "87654321"],
-			saveInJson: true,
-		}),
-	],
+  integrations: [
+    iubenda({
+      documentIds: ["12345678", "87654321"],
+      saveInJson: true,
+    }),
+  ],
 });
 ```
 
@@ -326,56 +326,56 @@ import { documents } from 'virtual:astro-iubenda';
 import type { IubendaCallbacks, ConsentEventName } from "astro-iubenda";
 
 const callbacks: IubendaCallbacks = {
-	onReady: (hasConsent: boolean) => {
-		console.log("Iubenda ready, has consent:", hasConsent);
-	},
-	onBannerShown: () => {
-		console.log("Banner shown");
-	},
-	onBannerClosed: () => {
-		console.log("Banner closed");
-	},
-	onConsentGiven: (consent: boolean) => {
-		console.log("Consent given:", consent);
-		// Enable analytics, tracking, etc.
-	},
-	onConsentFirstGiven: (event: ConsentEventName) => {
-		console.log("First consent given via:", event);
-		// Track conversion event
-	},
-	onConsentRejected: () => {
-		console.log("Consent rejected");
-		// Disable tracking
-	},
-	onPreferenceExpressed: (preferences: unknown) => {
-		console.log("User preferences:", preferences);
-	},
-	onPreferenceNotNeeded: () => {
-		console.log("No preference needed for this user");
-	},
-	onCcpaOptOut: () => {
-		console.log("User opted out (CCPA)");
-	},
-	onError: (message: string) => {
-		console.error("Iubenda error:", message);
-	},
+  onReady: (hasConsent: boolean) => {
+    console.log("Iubenda ready, has consent:", hasConsent);
+  },
+  onBannerShown: () => {
+    console.log("Banner shown");
+  },
+  onBannerClosed: () => {
+    console.log("Banner closed");
+  },
+  onConsentGiven: (consent: boolean) => {
+    console.log("Consent given:", consent);
+    // Enable analytics, tracking, etc.
+  },
+  onConsentFirstGiven: (event: ConsentEventName) => {
+    console.log("First consent given via:", event);
+    // Track conversion event
+  },
+  onConsentRejected: () => {
+    console.log("Consent rejected");
+    // Disable tracking
+  },
+  onPreferenceExpressed: (preferences: unknown) => {
+    console.log("User preferences:", preferences);
+  },
+  onPreferenceNotNeeded: () => {
+    console.log("No preference needed for this user");
+  },
+  onCcpaOptOut: () => {
+    console.log("User opted out (CCPA)");
+  },
+  onError: (message: string) => {
+    console.error("Iubenda error:", message);
+  },
 };
 
 // Use in your config
 export default defineConfig({
-	integrations: [
-		iubenda({
-			documentIds: ["12345678"],
-			cookieFooter: {
-				iubendaOptions: {
-					siteId: 12345678,
-					cookiePolicyId: 87654321,
-					lang: "en",
-					callback: callbacks,
-				},
-			},
-		}),
-	],
+  integrations: [
+    iubenda({
+      documentIds: ["12345678"],
+      cookieFooter: {
+        iubendaOptions: {
+          siteId: 12345678,
+          cookiePolicyId: 87654321,
+          lang: "en",
+          callback: callbacks,
+        },
+      },
+    }),
+  ],
 });
 ```
 
@@ -386,40 +386,40 @@ import type { HexColor } from "astro-iubenda";
 
 // Type-safe hex color definitions
 const brandColors = {
-	primary: "#0073aa" as HexColor,
-	secondary: "#005177" as HexColor,
-	accent: "#00a0d2" as HexColor,
-	dark: "#1e1e1e" as HexColor,
-	light: "#f7f7f7" as HexColor,
+  primary: "#0073aa" as HexColor,
+  secondary: "#005177" as HexColor,
+  accent: "#00a0d2" as HexColor,
+  dark: "#1e1e1e" as HexColor,
+  light: "#f7f7f7" as HexColor,
 } as const;
 
 export default defineConfig({
-	integrations: [
-		iubenda({
-			documentIds: ["12345678"],
-			cookieFooter: {
-				iubendaOptions: {
-					siteId: 12345678,
-					cookiePolicyId: 87654321,
-					lang: "en",
-					banner: {
-						backgroundColor: brandColors.dark,
-						textColor: brandColors.light,
-						acceptButtonColor: brandColors.primary,
-						acceptButtonCaptionColor: brandColors.light,
-						customizeButtonColor: brandColors.secondary,
-						customizeButtonCaptionColor: brandColors.light,
-						rejectButtonColor: brandColors.accent,
-						rejectButtonCaptionColor: brandColors.light,
-						brandTextColor: brandColors.primary,
-						brandBackgroundColor: brandColors.light,
-					},
-					floatingPreferencesButtonColor: brandColors.primary,
-					floatingPreferencesButtonCaptionColor: brandColors.light,
-				},
-			},
-		}),
-	],
+  integrations: [
+    iubenda({
+      documentIds: ["12345678"],
+      cookieFooter: {
+        iubendaOptions: {
+          siteId: 12345678,
+          cookiePolicyId: 87654321,
+          lang: "en",
+          banner: {
+            backgroundColor: brandColors.dark,
+            textColor: brandColors.light,
+            acceptButtonColor: brandColors.primary,
+            acceptButtonCaptionColor: brandColors.light,
+            customizeButtonColor: brandColors.secondary,
+            customizeButtonCaptionColor: brandColors.light,
+            rejectButtonColor: brandColors.accent,
+            rejectButtonCaptionColor: brandColors.light,
+            brandTextColor: brandColors.primary,
+            brandBackgroundColor: brandColors.light,
+          },
+          floatingPreferencesButtonColor: brandColors.primary,
+          floatingPreferencesButtonCaptionColor: brandColors.light,
+        },
+      },
+    }),
+  ],
 });
 ```
 
@@ -428,40 +428,40 @@ export default defineConfig({
 ```ts
 // Define configurations for different languages/regions
 const configs = {
-	en: {
-		siteId: 12345678,
-		cookiePolicyId: 87654321,
-		lang: "en",
-		enableGdpr: true,
-		enableCcpa: true,
-	},
-	es: {
-		siteId: 12345678,
-		cookiePolicyId: 11111111,
-		lang: "es",
-		enableGdpr: true,
-		enableLgpd: true,
-	},
-	de: {
-		siteId: 12345678,
-		cookiePolicyId: 22222222,
-		lang: "de",
-		enableGdpr: true,
-		gdprAppliesGlobally: true,
-	},
+  en: {
+    siteId: 12345678,
+    cookiePolicyId: 87654321,
+    lang: "en",
+    enableGdpr: true,
+    enableCcpa: true,
+  },
+  es: {
+    siteId: 12345678,
+    cookiePolicyId: 11111111,
+    lang: "es",
+    enableGdpr: true,
+    enableLgpd: true,
+  },
+  de: {
+    siteId: 12345678,
+    cookiePolicyId: 22222222,
+    lang: "de",
+    enableGdpr: true,
+    gdprAppliesGlobally: true,
+  },
 } as const;
 
 export default defineConfig({
-	integrations: [
-		iubenda({
-			documentIds: ["87654321", "11111111", "22222222"],
-			cookieFooter: {
-				// Use the English config as default
-				iubendaOptions: configs.en,
-				googleTagManagerOptions: true,
-			},
-		}),
-	],
+  integrations: [
+    iubenda({
+      documentIds: ["87654321", "11111111", "22222222"],
+      cookieFooter: {
+        // Use the English config as default
+        iubendaOptions: configs.en,
+        googleTagManagerOptions: true,
+      },
+    }),
+  ],
 });
 ```
 

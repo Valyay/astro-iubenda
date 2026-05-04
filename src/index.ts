@@ -128,8 +128,8 @@ export default function iubenda(opts: Options): AstroIntegration {
 
 				const WATCHED = [".env"];
 				server?.watcher?.add(WATCHED);
-				server?.watcher?.on("change", p => {
-					if (!WATCHED.some(f => p.endsWith(f))) return;
+				server?.watcher?.on("change", (p) => {
+					if (!WATCHED.some((f) => p.endsWith(f))) return;
 					logger.info(`🔄 ${p} changed → refreshing Iubenda docs`);
 					void refresh(logger);
 				});

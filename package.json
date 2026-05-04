@@ -1,82 +1,82 @@
 {
   "name": "astro-iubenda",
+  "version": "0.4.2",
   "description": "Astro integration for Iubenda Privacy Policy and Terms & Conditions",
-  "repository": "https://github.com/Valyay/astro-iubenda",
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "ccpa",
+    "cmp",
+    "consent",
+    "consent-management",
+    "cookie-banner",
+    "cookie-consent-banner",
+    "cookie-policy",
+    "gdpr",
+    "iubenda",
+    "lgpd",
+    "privacy-policy",
+    "terms-and-conditions",
+    "withastro"
+  ],
   "homepage": "https://github.com/Valyay/astro-iubenda#readme",
   "bugs": {
     "url": "https://github.com/Valyay/astro-iubenda/issues"
   },
-  "keywords": [
-    "astro",
-    "withastro",
-    "astro-integration",
-    "iubenda",
-    "privacy-policy",
-    "terms-and-conditions",
-    "consent",
-    "cookie-banner",
-    "cookie-policy",
-    "cookie-consent-banner",
-    "consent-management",
-    "cmp",
-    "gdpr",
-    "lgpd",
-    "ccpa"
-  ],
-  "author": "Evgeniy Valyaev <dev.valyay@gmail.com>",
   "license": "MIT",
-  "type": "module",
-  "version": "0.4.2",
-  "main": "./dist/index.js",
-  "exports": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "author": "Evgeniy Valyaev <dev.valyay@gmail.com>",
+  "repository": "https://github.com/Valyay/astro-iubenda",
   "files": [
     "dist",
     "virtual.d.ts"
   ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf dist pnpm-lock.yaml .pnpm-debug.log node_modules",
+    "preinstall": "npx only-allow pnpm",
+    "clean": "node --input-type=commonjs -e \"const {rmSync}=require('node:fs');for (const p of ['dist','pnpm-lock.yaml','.pnpm-debug.log','node_modules']) rmSync(p,{recursive:true,force:true})\"",
     "typecheck": "tsc --noEmit --pretty",
     "test:pub": "pnpm publish --dry-run --no-git-checks",
-    "preinstall": "npx only-allow pnpm",
     "build": "tsup",
-    "lint": "eslint . --ext .ts,.js,.mjs,.cjs",
-    "lint:fix": "eslint . --fix --ext .ts,.js,.mjs,.cjs",
-    "format": "prettier -w  .",
-    "prettier:check": "prettier --check .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "prepack": "pnpm run build && cp ./virtual.d.ts dist/virtual.d.ts",
     "changeset": "changeset",
     "version": "changeset version && pnpm install --no-frozen-lockfile",
     "release": "pnpm run build && changeset publish",
     "test": "vitest run",
     "test:watch": "vitest",
-    "size": "size-limit"
-  },
-  "peerDependencies": {
-    "astro": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0"
+    "size": "size-limit",
+    "prepare-hooks": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8",
-    "@size-limit/preset-small-lib": "^12.0.0",
-    "@types/node": "^25.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.50.0",
-    "@vitest/coverage-v8": "^4.0.16",
-    "astro": "^5.16.6",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "nano-staged": "^0.9.0",
-    "prettier": "^3.7.4",
-    "rimraf": "^6.1.2",
-    "simple-git-hooks": "^2.13.1",
-    "size-limit": "^12.0.0",
+    "@changesets/cli": "^2.31.0",
+    "@size-limit/preset-small-lib": "^12.1.0",
+    "@types/node": "^22.19.17",
+    "@vitest/coverage-v8": "^4.1.5",
+    "astro": "^6.2.2",
+    "nano-staged": "^1.0.2",
+    "oxfmt": "^0.47.0",
+    "oxlint": "^1.62.0",
+    "size-limit": "^12.1.0",
     "size-limit-preset-node-lib": "^0.4.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.50.0",
-    "vite": "^7.3.0",
-    "vitest": "^4.0.16"
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
+  },
+  "peerDependencies": {
+    "astro": "^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0"
+  },
+  "nano-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,json}": [
+      "oxfmt",
+      "oxlint --fix"
+    ]
   },
   "size-limit": [
     {
@@ -84,18 +84,9 @@
       "limit": "2.314 kB"
     }
   ],
-  "nano-staged": {
-    "*.{js,jsx,ts,tsx,astro}": [
-      "prettier --write",
-      "eslint --fix"
-    ]
-  },
-  "simple-git-hooks": {
-    "pre-commit": "./node_modules/.bin/nano-staged",
-    "postinstall": "npx simple-git-hooks"
-  },
   "engines": {
-    "pnpm": ">=10",
-    "node": ">=20"
-  }
+    "node": ">=22",
+    "pnpm": ">=11"
+  },
+  "packageManager": "pnpm@11.0.4+sha512.0a397165007a014ed52919a61e5f46c48b9bca88404c303ecaecc63f62def563898d3c6b8a5d5ea5811eb398cfe03ab05da1a5ce963f126d5ead4c02f93b83c3"
 }

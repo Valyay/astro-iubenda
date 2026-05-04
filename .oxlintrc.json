@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "warn",
+    "restriction": "off",
+    "pedantic": "off",
+    "style": "off"
+  },
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    ".astro",
+    ".cache",
+    "public",
+    ".changeset",
+    "coverage"
+  ],
+  "rules": {
+    "typescript/explicit-function-return-type": "error",
+    "typescript/no-explicit-any": "error",
+    "no-console": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "tests/**/*.ts"],
+      "rules": {
+        "typescript/explicit-function-return-type": "off",
+        "typescript/no-explicit-any": "off",
+        "no-console": "off"
+      }
+    }
+  ]
+}

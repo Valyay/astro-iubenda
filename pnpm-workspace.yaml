@@ -1,0 +1,11 @@
+# pnpm 11 supply-chain controls.
+# Each key is `true` (scripts allowed) or `false` (explicitly disallowed, no error).
+# Anything not listed is treated as an error — this forces explicit review of every
+# new dependency that wants to run lifecycle scripts.
+allowBuilds:
+  # Required: tsup/vite use esbuild and rely on its install step to place the
+  # platform-specific binary.
+  esbuild: true
+  # Pulled in transitively via astro for image optimization. We don't run astro
+  # builds in this repo, so we explicitly opt out of its native binary download.
+  sharp: false

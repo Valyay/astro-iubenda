@@ -1,0 +1,4 @@
+#!/bin/sh
+# Run only on staged files via nano-staged.
+# Requires one-time setup: `pnpm prepare-hooks`
+exec pnpm exec nano-staged

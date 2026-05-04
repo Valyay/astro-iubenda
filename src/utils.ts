@@ -81,7 +81,7 @@ export const fetchAllDocuments = async (
 	const store: Record<string, PolicySet> = {};
 
 	await Promise.all(
-		documentIds.map(async id => {
+		documentIds.map(async (id) => {
 			const data: PolicySet = {
 				privacyPolicy: null,
 				cookiePolicy: null,
