@@ -1,6 +1,6 @@
 {
   "name": "astro-iubenda",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "Astro integration for Iubenda Privacy Policy and Terms & Conditions",
   "keywords": [
     "astro",
